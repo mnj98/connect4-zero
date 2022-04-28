@@ -28,6 +28,7 @@ class Coach():
         self.mcts = MCTS(self.game, self.nnet, self.args)
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
+        self.iter = 1
 
     def executeEpisode(self):
         """
@@ -77,7 +78,8 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
 
-        for i in range(1, self.args.numIters + 1):
+        for i in range(self.iter, self.args.numIters + 1):
+            self.iter = i
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
             # examples of the iteration
@@ -99,6 +101,10 @@ class Coach():
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples(i - 1)
 
+            # remove unneccessary training examples storage
+            
+            if self.args.trim_examples != 0:
+                self.trimExamples()
             # shuffle examples before training
             trainExamples = []
             for e in self.trainExamplesHistory:
@@ -124,7 +130,10 @@ class Coach():
 
             if reject:
                 log.info('REJECTING NEW MODEL')
-                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                if self.args['rebase_to_best_on_reject']:
+                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                else:
+                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
@@ -142,19 +151,36 @@ class Coach():
             Pickler(f).dump(self.trainExamplesHistory)
         f.closed
 
+    def getTrainExampleFile(self, examplesFile):
+        log.info("File with trainExamples found. Loading it...")
+        with open(examplesFile, "rb") as f:
+            self.trainExamplesHistory = Unpickler(f).load()
+        log.info('Loading done!')
+        # examples based on the model were already collected (loaded)
+        self.skipFirstSelfPlay = True
+
     def loadTrainExamples(self):
         modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
         examplesFile = modelFile + ".examples"
         if not os.path.isfile(examplesFile):
             log.warning(f'File "{examplesFile}" with trainExamples not found!')
-            r = input("Continue? [y|n]")
-            if r != "y":
-                sys.exit()
+            log.warning(f'Please input checkpoint example # to load. If starting new model, input 0.')
+            self.iter = int(input()) + 2
+            examplesFile = os.path.join(self.args.load_folder_file[0], "checkpoint_" + str(self.iter - 2) + ".pth.tar.examples")
+            if not os.path.isfile(examplesFile):
+                if self.iter != 2:
+                    r = input(f'File "{examplesFile}" with trainExamples not found either. Continue? [y|n]')
+                    if r != "y":
+                        sys.exit()
+                else:
+                    self.iter = 1
+            else:
+                self.getTrainExampleFile(examplesFile) 
         else:
-            log.info("File with trainExamples found. Loading it...")
-            with open(examplesFile, "rb") as f:
-                self.trainExamplesHistory = Unpickler(f).load()
-            log.info('Loading done!')
+            self.getTrainExampleFile(examplesFile)
 
-            # examples based on the model were already collected (loaded)
-            self.skipFirstSelfPlay = True
+    def trimExamples(self):
+        examplesFile = os.path.join(self.args.load_folder_file[0], "checkpoint_" + str(self.iter - 1 - self.args.trim_examples) + ".pth.tar.examples")
+        if os.path.isfile(examplesFile):
+            log.info(f"Removing: {examplesFile}, as set by trim_examples arg.")
+            os.remove(examplesFile)

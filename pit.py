@@ -2,11 +2,8 @@ import Arena
 from MCTS import MCTS
 from connect4.Connect4Game import Connect4Game as Game
 from connect4.Connect4Players import *
+from connect4.torch_2L_K3.NNet import NNetWrapper as NNet
 from connect4.torch_4_layerCNN.NNet import NNetWrapper as NNet4L
-from connect4.torch_6_layerCNN.NNet import NNetWrapper as NNet6L
-from connect4.torch_4_layerCNN_kernalSize5.NNet import NNetWrapper as NNet5K
-
-from connect4.torch_4_layerMLP.NNet import NNetWrapper as MLP
 
 import numpy as np
 from utils import *
@@ -33,22 +30,24 @@ hp = HumanConnect4Player(g).play
 
 
 # nnet players
-n1 = NNet4L(g)
-'''
-if mini_othello:
-    n1.load_checkpoint('./pretrained_models/othello/pytorch/','6x100x25_best.pth.tar')
-else:
-    n1.load_checkpoint('./pretrained_models/othello/pytorch/','8x8_100checkpoints_best.pth.tar')
-'''
-n1.load_checkpoint('./saved_checkpoints/4layerCNN', '44rounds.pth.tar')
+n1 = NNet(g)
+n1.load_checkpoint('./saved_checkpoints/torch_2L_K3', 'best.pth.tar')
 args1 = dotdict({'numMCTSSims': 25, 'cpuct':1.0})
 mcts1 = MCTS(g, n1, args1)
-n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
+n1 = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
 
+
+n2 = NNet4L(g)
+n2.load_checkpoint('./saved_checkpoints/4layerCNN', '44rounds.pth.tar')
+args1 = dotdict({'numMCTSSims': 25, 'cpuct':1.0})
+mcts2 = MCTS(g, n2, args1)
+n2 = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
+'''
 n2 = MLP(g)
 n2.load_checkpoint('./saved_checkpoints/MLP', 'best.pth.tar')
 mcts2 = MCTS(g, n2, args1)
 n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
+'''
 
 '''
 if human_vs_cpu:
@@ -62,6 +61,6 @@ else:
 
     player2 = n2p  # Player 2 is neural network if it's cpu vs cpu.
 '''
-arena = Arena.Arena(hp, n2p, g, display=Game.display)
+arena = Arena.Arena(hp, n2, g, display=Game.display)
 
-print(arena.playGames(2, verbose=True))
+print(arena.playGames(10, verbose=True))

@@ -168,11 +168,11 @@ class Coach():
         examplesFile = modelFile + ".examples"
         if not os.path.isfile(examplesFile):
             log.warning(f'File "{examplesFile}" with trainExamples not found!')
-            log.warning(f'Please input checkpoint # to load. If starting new model, input 0. :')
-            self.iter = int(input()) + 1
+            log.warning(f'Please input checkpoint example data # to load. If starting new model, input 0.\nYou will lose the consecutive rejects count, but probably do want to do this:')
+            self.iter = int(input()) + 2
             examplesFile = os.path.join(self.args.load_folder_file[0], "checkpoint_" + str(self.iter - 2) + ".pth.tar.examples")
             if not os.path.isfile(examplesFile):
-                if self.iter != 1:
+                if self.iter != 2:
                     r = input(f'File "{examplesFile}" with trainExamples not found either. Continue? [y|n]')
                     if r != "y":
                         sys.exit()

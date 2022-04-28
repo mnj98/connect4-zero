@@ -26,7 +26,7 @@ args = dotdict({
 
     'checkpoint': './saved_checkpoints/torch_3L_K3_C18_1LS_2',
     'load_model': True,
-    'load_folder_file': ('./saved_checkpoints/torch_3L_K3_C18_1LS_2','best.pth.tar'),
+    'load_folder_file': ('./saved_checkpoints/torch_3L_K3_C18_1LS_2','temp.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
     'rebase_to_best_on_reject': 15, # rebase after this many rejections in a row, 1 to rebase immediately, 0 to disable rebasing
     'trim_examples': 1 # Trim examples this far back. Does nothing if set to 0

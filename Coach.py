@@ -126,7 +126,7 @@ class Coach():
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            reject = pwins + nwins == 0 or float(nwins) / (pwins + nwins + (draws * 0.05)) < self.args.updateThreshold
+            reject = pwins + nwins == 0 or float(nwins) / (pwins + nwins + (draws * self.args.draw_penalty)) < self.args.updateThreshold
 
 
             if reject:

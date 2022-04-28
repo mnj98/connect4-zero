@@ -1,5 +1,5 @@
 import numpy as np
-
+import sys
 
 class RandomPlayer():
     def __init__(self, game):
@@ -22,8 +22,12 @@ class HumanConnect4Player():
         print('\nMoves:', [i for (i, valid) in enumerate(valid_moves) if valid])
 
         while True:
+            move = input()
+            if move == 'c':
+                print("Exiting.")
+                sys.exit(0)
             try:
-                move = int(input())
+                move = int(move)
                 if valid_moves[move]: break
                 else: print('Invalid move')
             except:

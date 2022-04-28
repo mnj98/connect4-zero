@@ -2,7 +2,7 @@ import Arena
 from MCTS import MCTS
 from connect4.Connect4Game import Connect4Game as Game
 from connect4.Connect4Players import *
-from connect4.torch_2L_K3.NNet import NNetWrapper as NNet
+from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as NNet
 from connect4.torch_4_layerCNN.NNet import NNetWrapper as NNet4L
 
 import numpy as np
@@ -31,7 +31,7 @@ hp = HumanConnect4Player(g).play
 
 # nnet players
 n1 = NNet(g)
-n1.load_checkpoint('./saved_checkpoints/torch_2L_K3', 'best.pth.tar')
+n1.load_checkpoint('./saved_checkpoints/torch_3L_K3_C18_1LS_2', 'best.pth.tar')
 args1 = dotdict({'numMCTSSims': 25, 'cpuct':1.0})
 mcts1 = MCTS(g, n1, args1)
 n1 = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
@@ -61,6 +61,7 @@ else:
 
     player2 = n2p  # Player 2 is neural network if it's cpu vs cpu.
 '''
-arena = Arena.Arena(hp, n2, g, display=Game.display)
+arena = Arena.Arena(n1, hp, g, display=Game.display)
 
-print(arena.playGames(10, verbose=True))
+print("Can exit by entering \"c\" if human is playing, ctrl-c otherwise.")
+print(f"P1 Wins, P2 Wins, Draws: \n {arena.playGames(10, verbose=True)}")

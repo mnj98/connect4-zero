@@ -29,6 +29,7 @@ class Coach():
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
         self.iter = 1
+        self.consecutive_rejections = 0
 
     def executeEpisode(self):
         """
@@ -130,12 +131,15 @@ class Coach():
 
             if reject:
                 log.info('REJECTING NEW MODEL')
-                if self.args['rebase_to_best_on_reject']:
+                self.consecutive_rejections += 1
+                if self.args.rebase_to_best_on_reject != 0 and self.consecutive_rejections >= self.args.rebase_to_best_on_reject:
+                    self.consecutive_rejections = 0
                     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
                 else:
                     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:
                 log.info('ACCEPTING NEW MODEL')
+                self.consecutive_rejections = 0
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
 
@@ -152,7 +156,7 @@ class Coach():
         f.closed
 
     def getTrainExampleFile(self, examplesFile):
-        log.info("File with trainExamples found. Loading it...")
+        log.info(f"File: {examplesFile}  with trainExamples found. Loading it...")
         with open(examplesFile, "rb") as f:
             self.trainExamplesHistory = Unpickler(f).load()
         log.info('Loading done!')
@@ -164,11 +168,11 @@ class Coach():
         examplesFile = modelFile + ".examples"
         if not os.path.isfile(examplesFile):
             log.warning(f'File "{examplesFile}" with trainExamples not found!')
-            log.warning(f'Please input checkpoint example # to load. If starting new model, input 0.')
-            self.iter = int(input()) + 2
+            log.warning(f'Please input checkpoint # to load. If starting new model, input 0. :')
+            self.iter = int(input()) + 1
             examplesFile = os.path.join(self.args.load_folder_file[0], "checkpoint_" + str(self.iter - 2) + ".pth.tar.examples")
             if not os.path.isfile(examplesFile):
-                if self.iter != 2:
+                if self.iter != 1:
                     r = input(f'File "{examplesFile}" with trainExamples not found either. Continue? [y|n]')
                     if r != "y":
                         sys.exit()
@@ -182,5 +186,5 @@ class Coach():
     def trimExamples(self):
         examplesFile = os.path.join(self.args.load_folder_file[0], "checkpoint_" + str(self.iter - 1 - self.args.trim_examples) + ".pth.tar.examples")
         if os.path.isfile(examplesFile):
-            log.info(f"Removing: {examplesFile}, as set by trim_examples arg.")
+            log.info(f"Removing: {examplesFile} to trim examples.")
             os.remove(examplesFile)

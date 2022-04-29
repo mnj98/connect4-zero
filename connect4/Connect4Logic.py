@@ -30,7 +30,6 @@ class Board():
         available_idx, = np.where(self.np_pieces[:, column] == 0)
         if len(available_idx) == 0:
             raise ValueError("Can't play column %s on board %s" % (column, self))
-
         self.np_pieces[available_idx[-1]][column] = player
 
     def get_valid_moves(self):
@@ -53,7 +52,7 @@ class Board():
         # Game is not ended yet.
         return WinState(False, None)
 
-    def with_np_pieces(self, np_pieces):
+    def with_np_pieces(self, np_pieces=None):
         """Create copy of board with specified pieces."""
         if np_pieces is None:
             np_pieces = self.np_pieces

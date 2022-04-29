@@ -1,8 +1,13 @@
+import random
 import numpy as np
 import sys
+import subprocess
+
+from connect4.Connect4Game import Connect4Game
+from connect4.Connect4Logic import Board
 
 class RandomPlayer():
-    def __init__(self, game):
+    def __init__(self, game: Connect4Game):
         self.game = game
 
     def play(self, board):
@@ -12,6 +17,89 @@ class RandomPlayer():
             a = np.random.randint(self.game.getActionSize())
         return a
 
+class SolverPlayer():
+    def __init__(self, game: Connect4Game, solver_file, book_file):
+        self.game = game
+        self.solver_file = solver_file
+        self.book_file = book_file
+
+    def play(self, board):
+        return random.choice(self.best_move(board))
+
+    def best_move(self, board):
+        # may need to check the precoditions in the solvers main.cpp
+        moves_made = ""
+        for move in self.game.moves_made:
+            moves_made += str(move+1)
+
+        #print(f"moves made: {moves_made}")
+        best_score = 23 #just needs to be an impossibly high score #goal is to minimize the opponents best score
+        best_moves = []
+        solver_scores = []
+        solver_actions = []
+        winners = []
+        player1 = (len(self.game.moves_made) + 1) % 2
+        if player1:
+            player_value = -1
+        else:
+            player_value = 1
+        print(f"player value: {player_value}")
+
+        valid = self.game.getValidMoves(np.copy(board), player_value)
+        for i in range(0, 7):
+            if not valid[i]:
+                continue
+
+            results = subprocess.run([self.solver_file, '-b', self.book_file, '', moves_made+str(i+1)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            if self.check_win(i, board, player_value):
+                winners.append(i)
+            else:
+                try:
+                    score = int(results.stdout)
+                    solver_scores.append(score)
+                    solver_actions.append(i)
+                except:
+                    print(f"ERROR received non-int score for: {i}")
+                    print(results.stdout)
+                    print(results.stderr)
+                    print(f"wiping old winners, this was not found by the check_win func")
+                    winners = [i]
+        
+        print(f"moves_made: {moves_made}")
+        print(f"solver_scores: {solver_scores}")
+        print(f"solver_actions: {solver_actions}")
+
+        if len(winners) > 0:
+            print(f"WINNERS: {winners}")
+            return winners
+
+        for i in range(len(solver_scores)):
+            if solver_scores[i] == best_score:
+                best_moves.append(solver_actions[i])
+            if solver_scores[i] < best_score:
+                best_score = solver_scores[i]
+                best_moves = [solver_actions[i]]
+        
+        if len(best_moves) > 0:
+            print(f"solver_best: {best_moves}")
+            return best_moves
+
+        else:
+            i = 0
+            while not valid[i]:
+                i += 1
+            return [i]
+
+    def check_win(self, column, board, player_value):
+        potential_board = Board(height=6, width=7, win_length=4, np_pieces=np.copy(board))
+        if potential_board.get_valid_moves()[column]:
+            potential_board.add_stone(column, player_value)
+            win, win_player = potential_board.get_win_state()
+            if win:
+                print(f"win for: {win_player}, at {column}")
+            if win and win_player == player_value:
+                return True
+        return False
 
 class HumanConnect4Player():
     def __init__(self, game):

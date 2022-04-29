@@ -20,6 +20,7 @@ class Connect4Game(Game):
                     'training_draw_penalty': 1e4 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
             })
         self._base_board = Board(height, width, win_length, np_pieces)
+        self.moves_made = []
 
     def getInitBoard(self):
         return self._base_board.np_pieces
@@ -67,9 +68,6 @@ class Connect4Game(Game):
 
     def stringRepresentation(self, board):
         return board.tostring()
-
-
-    
 
     @staticmethod
     def display(board):

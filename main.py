@@ -24,14 +24,14 @@ args = dotdict({
     'arenaCompare': 150,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1,
 
-    'checkpoint': './saved_checkpoints/torch_3L_K3_C18_1LS_TEMP',
+    'checkpoint': './saved_checkpoints/torch_3L_K3_C18_1LS_v3',
     'load_model': True,
-    'load_folder_file': ('./saved_checkpoints/torch_3L_K3_C18_1LS_TEMP','temp.pth.tar'),
+    'load_folder_file': ('./saved_checkpoints/torch_3L_K3_C18_1LS_v3','temp.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
     'rebase_to_best_on_reject': 15, # rebase after this many rejections in a row, 1 to rebase immediately, 0 to disable rebasing
     'trim_examples': 1, # Trim examples this far back. Does nothing if set to 0
     'draw_penalty': 0.05, # Penalization for drawing, 0 is none, 1 is as much as a loss
-    'training_draw_penalty': 0.1 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
+    'training_draw_penalty': 0.05 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
 
 })
 

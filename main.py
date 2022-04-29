@@ -20,22 +20,23 @@ args = dotdict({
     'tempThreshold': 15,        #
     'updateThreshold': 0.505,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
-    'numMCTSSims': 25,          # Number of games moves for MCTS to simulate.
+    'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 150,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1,
 
-    'checkpoint': './saved_checkpoints/torch_3L_K3_C18_1LS_2',
+    'checkpoint': './saved_checkpoints/torch_3L_K3_C18_1LS_TEMP',
     'load_model': True,
-    'load_folder_file': ('./saved_checkpoints/torch_3L_K3_C18_1LS_2','temp.pth.tar'),
+    'load_folder_file': ('./saved_checkpoints/torch_3L_K3_C18_1LS_TEMP','temp.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
     'rebase_to_best_on_reject': 15, # rebase after this many rejections in a row, 1 to rebase immediately, 0 to disable rebasing
-    'trim_examples': 1 # Trim examples this far back. Does nothing if set to 0
+    'trim_examples': 1, # Trim examples this far back. Does nothing if set to 0
+    'draw_penalty': 0.05 # Penalization for drawing, 0 is none, 1 is as much as a loss
 })
 
 
 def main():
     log.info('Loading %s...', Game.__name__)
-    g = Game(6)
+    g = Game(args)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)

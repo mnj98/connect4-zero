@@ -89,7 +89,7 @@ class Coach():
 
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
-                    iterationTrainExamples += self.executeEpisode()
+                    iterationTrainExamples.extend(self.executeEpisode())
 
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
@@ -98,6 +98,7 @@ class Coach():
                 log.warning(
                     f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
                 self.trainExamplesHistory.pop(0)
+                
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples(i - 1)

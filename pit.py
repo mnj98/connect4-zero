@@ -4,7 +4,7 @@ from connect4.Connect4Game import Connect4Game as Game
 from connect4.Connect4Players import *
 from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as NNet
 from connect4.torch_4_layerCNN.NNet import NNetWrapper as NNet4L
-
+from main import args
 import numpy as np
 from utils import *
 
@@ -27,19 +27,17 @@ rp = RandomPlayer(g).play
 lap = OneStepLookaheadConnect4Player(g).play
 hp = HumanConnect4Player(g).play
 
-
+args1 = args
 
 # nnet players
 n1 = NNet(g)
 n1.load_checkpoint('./saved_checkpoints/torch_3L_K3_C18_1LS_2', 'best.pth.tar')
-args1 = dotdict({'numMCTSSims': 25, 'cpuct':1.0})
 mcts1 = MCTS(g, n1, args1)
 n1 = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
 
 
 n2 = NNet4L(g)
 n2.load_checkpoint('./saved_checkpoints/4layerCNN', '44rounds.pth.tar')
-args1 = dotdict({'numMCTSSims': 25, 'cpuct':1.0})
 mcts2 = MCTS(g, n2, args1)
 n2 = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
 '''
@@ -63,5 +61,4 @@ else:
 '''
 arena = Arena.Arena(n1, hp, g, display=Game.display)
 
-print("Can exit by entering \"c\" if human is playing, ctrl-c otherwise.")
 print(f"P1 Wins, P2 Wins, Draws: \n {arena.playGames(10, verbose=True)}")

@@ -23,9 +23,6 @@ class HumanConnect4Player():
 
         while True:
             move = input()
-            if move == 'c':
-                print("Exiting.")
-                sys.exit(0)
             try:
                 move = int(move)
                 if valid_moves[move]: break

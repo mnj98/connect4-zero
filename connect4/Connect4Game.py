@@ -1,19 +1,24 @@
 import sys
 import numpy as np
-
 sys.path.append('..')
 from Game import Game
 from .Connect4Logic import Board
-
+from utils import *
 
 class Connect4Game(Game):
     """
     Connect4 Game class implementing the alpha-zero-general Game interface.
     """
 
-    def __init__(self, args, height=None, width=None, win_length=None, np_pieces=None):
+    def __init__(self, args=None, height=None, width=None, win_length=None, np_pieces=None):
         Game.__init__(self)
-        self.args = args
+        if args != None:
+            self.args = args
+        else:
+            print("WARNING: No args supplied to the game, using defaults")
+            self.args = dotdict({
+                    'training_draw_penalty': 1e4 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
+            })
         self._base_board = Board(height, width, win_length, np_pieces)
 
     def getInitBoard(self):
@@ -41,7 +46,7 @@ class Connect4Game(Game):
         if winstate.is_ended:
             if winstate.winner is None:
                 # draw has very little negative value.
-                return self.args.draw_penalty * -1
+                return self.args.training_draw_penalty * -1
             elif winstate.winner == player:
                 return +1
             elif winstate.winner == -player:
@@ -69,9 +74,9 @@ class Connect4Game(Game):
     @staticmethod
     def display(board):
         def piece(p):
-            if p == 1: return '🔵'
-            if p == -1: return '🔴'
-            return '\u25CE'
+            if p == 1: return '🔴'
+            if p == -1: return '🟡'
+            return '⚪'
         print(" -----------------------")
         if len(board[0]) == 7:
             print('   0    1    2    3    4    5    6')

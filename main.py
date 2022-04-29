@@ -30,7 +30,9 @@ args = dotdict({
     'numItersForTrainExamplesHistory': 20,
     'rebase_to_best_on_reject': 15, # rebase after this many rejections in a row, 1 to rebase immediately, 0 to disable rebasing
     'trim_examples': 1, # Trim examples this far back. Does nothing if set to 0
-    'draw_penalty': 0.05 # Penalization for drawing, 0 is none, 1 is as much as a loss
+    'draw_penalty': 0.05, # Penalization for drawing, 0 is none, 1 is as much as a loss
+    'training_draw_penalty': 0.1 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
+
 })
 
 

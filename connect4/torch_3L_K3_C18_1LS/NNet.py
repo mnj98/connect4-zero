@@ -15,8 +15,8 @@ import torch.optim as optim
 from .Connect4NNet import Connect4NNet as cnnet
 
 args = dotdict({
-    'lr': 0.002,
-    'dropout': 0.3,
+    'lr': 0.001,
+    'dropout': 0.1,
     'epochs': 10,
     'batch_size': 64,
     'cuda': torch.cuda.is_available(),

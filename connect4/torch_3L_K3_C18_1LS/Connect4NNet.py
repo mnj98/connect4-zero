@@ -2,15 +2,10 @@ import sys
 sys.path.append('..')
 from utils import *
 
-import argparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.autograd import Variable
 
-# this model was trained with rebasing to best model after 15 rejections, with update threshold 0.505 and 25 MCTS sims
 class Connect4NNet(nn.Module):
     def __init__(self, game, args):
         # game params
@@ -50,9 +45,6 @@ class Connect4NNet(nn.Module):
         
         # shared layers
         s = F.leaky_relu(self.flatten(self.board_discovery_layer_bn(self.board_discovery_layer(s))))
-        
-
-        #s = F.dropout(F.relu(self.fc_bn1(self.fc1(s))), p=self.args.dropout, training=self.training)
 
         # action layers
         pi = F.dropout(self.analysis_layer_bn(F.leaky_relu(self.analysis_layer(s))), p=0.1)

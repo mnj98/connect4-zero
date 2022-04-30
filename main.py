@@ -1,11 +1,12 @@
+# CHANGE THESE TO MATCH THE MODEL
+from connect4.torch_3L_K3_C27_1LS.NNet import NNetWrapper as nn
+MODEL = "torch_3L_K3_C27_1LS"
+
 import logging
-
 import coloredlogs
-
 from Coach import Coach
 #from othello.OthelloGame import OthelloGame as Game
 from connect4.Connect4Game import Connect4Game as Game
-from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as nn
 #from othello.pytorch.NNet import NNetWrapper as nn
 from utils import *
 import os
@@ -14,6 +15,7 @@ log = logging.getLogger(__name__)
 
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
+CHECKPOINTS = os.path.join('saved_checkpoints', MODEL)
 args = dotdict({
     'numIters': 500,
     'numEps': 300,              # Number of complete self-play games to simulate during a new iteration.
@@ -24,9 +26,9 @@ args = dotdict({
     'arenaCompare': 150,         # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1,
 
-    'checkpoint': './saved_checkpoints/torch_3L_K3_C18_1LS_v3',
+    'checkpoint': CHECKPOINTS,
     'load_model': True,
-    'load_folder_file': ('./saved_checkpoints/torch_3L_K3_C18_1LS_v3','temp.pth.tar'),
+    'load_folder_file': os.path.join(CHECKPOINTS, 'temp.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
     'rebase_to_best_on_reject': 15, # rebase after this many rejections in a row, 1 to rebase immediately, 0 to disable rebasing
     'trim_examples': 1, # Trim examples this far back. Does nothing if set to 0

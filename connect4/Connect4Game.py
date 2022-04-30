@@ -79,6 +79,6 @@ class Connect4Game(Game):
         if len(board[0]) == 7:
             print('   0    1    2    3    4    5    6')
         else:
-            print(' '.join(map(str, range(len(board[0])))))
+            print(''.join(map(str, range(len(board[0])))))
         print(np.array([piece(b) for b in board.flatten()]).reshape(board.shape))
         print(" -----------------------")

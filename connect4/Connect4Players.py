@@ -38,6 +38,7 @@ class SolverPlayer():
         solver_scores = []
         solver_actions = []
         winners = []
+        blockers = []
         player1 = (len(self.game.moves_made) + 1) % 2
         if player1:
             player_value = -1
@@ -51,8 +52,12 @@ class SolverPlayer():
                 continue
 
             results = subprocess.run([self.solver_file, '-b', self.book_file, '', moves_made+str(i+1)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-            if self.check_win(i, board, player_value):
+            win, winning_player = self.check_win(i, board, player_value * -1)
+            if win:
                 winners.append(i)
+            win, winning_player = self.check_win(i, board, player_value)
+            if win:
+                blockers.append(i)
             else:
                 try:
                     score = int(results.stdout)
@@ -62,8 +67,8 @@ class SolverPlayer():
                     print(f"ERROR received non-int score for: {i}")
                     print(results.stdout)
                     print(results.stderr)
-                    print(f"wiping old winners, this was not found by the check_win func")
-                    winners = [i]
+                    print(f"check_win output: {self.check_win(i, board, player_value)}")
+                    winners.append(i)
         
         print(f"moves_made: {moves_made}")
         print(f"solver_scores: {solver_scores}")
@@ -72,6 +77,10 @@ class SolverPlayer():
         if len(winners) > 0:
             print(f"WINNERS: {winners}")
             return winners
+        
+        if len(blockers) > 0:
+            print(f"BLOCKERS: {blockers}")
+            return blockers
 
         for i in range(len(solver_scores)):
             if solver_scores[i] == best_score:
@@ -97,9 +106,8 @@ class SolverPlayer():
             win, win_player = potential_board.get_win_state()
             if win:
                 print(f"win for: {win_player}, at {column}")
-            if win and win_player == player_value:
-                return True
-        return False
+                return True, win_player
+        return False, None
 
 class HumanConnect4Player():
     def __init__(self, game):

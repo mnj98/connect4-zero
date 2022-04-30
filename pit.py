@@ -70,6 +70,6 @@ else:
     player2 = n2p  # Player 2 is neural network if it's cpu vs cpu.
 '''
 
-arena = Arena.Arena(n1, solver_player, g, display=Game.display, solver=True)
+arena = Arena.Arena(n1, n2, g, display=Game.display, solver=True)
 
-print(f"P1 Wins, P2 Wins, Draws: \n {arena.playGames(2, verbose=True)}")
+print(f"P1 Wins, P2 Wins, Draws: \n {arena.playGames(10, verbose=True)}")

@@ -39,6 +39,7 @@ class SolverPlayer():
         solver_actions = []
         winners = []
         blockers = []
+        drawers = []
         player1 = (len(self.game.moves_made) + 1) % 2
         if player1:
             player_value = -1
@@ -52,11 +53,11 @@ class SolverPlayer():
                 continue
 
             results = subprocess.run([self.solver_file, '-b', self.book_file, '', moves_made+str(i+1)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-            win, winning_player = self.check_win(i, board, player_value * -1)
-            if win:
-                winners.append(i)
             win, winning_player = self.check_win(i, board, player_value)
-            if win:
+            if win and winning_player == player_value:
+                winners.append(i)
+            #win, winning_player = self.check_win(i, board, player_value)
+            if win and winning_player == -1 * player_value:
                 blockers.append(i)
             else:
                 try:
@@ -89,6 +90,9 @@ class SolverPlayer():
                 best_score = solver_scores[i]
                 best_moves = [solver_actions[i]]
         
+        if best_score > 0 and len(drawers) > 0:
+            return drawers
+
         if len(best_moves) > 0:
             print(f"solver_best: {best_moves}")
             return best_moves
@@ -106,7 +110,7 @@ class SolverPlayer():
             win, win_player = potential_board.get_win_state()
             if win:
                 print(f"win for: {win_player}, at {column}")
-                return True, win_player
+            return win, win_player
         return False, None
 
 class HumanConnect4Player():

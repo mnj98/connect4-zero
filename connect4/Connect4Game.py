@@ -17,7 +17,7 @@ class Connect4Game(Game):
         else:
             print("WARNING: No args supplied to the game, using defaults")
             self.args = dotdict({
-                    'training_draw_penalty': 1e4 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
+                    'training_draw_penalty': 0.05 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
             })
         self._base_board = Board(height, width, win_length, np_pieces)
         self.moves_made = []

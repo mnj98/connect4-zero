@@ -48,7 +48,7 @@ class Connect4NNet(nn.Module):
         # action layers
         pi = F.dropout(self.analysis_layer_bn(F.leaky_relu(self.analysis_layer(s))), p=0.1)
         pi = F.dropout(self.planning_layer_bn(F.leaky_relu(self.planning_layer(pi))), p=0.1)
-        pi = F.dropout(F.log_softmax(self.action_layer(pi), dim=1), p=0.1)
+        pi = F.log_softmax(self.action_layer(pi), dim=1)
 
         # assessment layers
         v = F.dropout(self.status_layer_bn(F.leaky_relu(self.status_layer(s))), p=0.1)

@@ -1,5 +1,0 @@
-this model was trained with rebasing to best model after 15 rejections, with update threshold 0.505, 25 MCTS sims, dropout 0.1, and draw penalty 0.05
-
-until iter 112
-learn rate was .002 and  mcts sims were 25, then it was .001 and 50
-this was done in an attempt to have the model learn to play out farther

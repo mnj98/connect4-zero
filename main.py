@@ -28,7 +28,7 @@ args = dotdict({
 
     'checkpoint': CHECKPOINTS,
     'load_model': True,
-    'load_folder_file': os.path.join(CHECKPOINTS, 'temp.pth.tar'),
+    'load_folder_file': [CHECKPOINTS, 'temp.pth.tar'],
     'numItersForTrainExamplesHistory': 20,
     'rebase_to_best_on_reject': 15, # rebase after this many rejections in a row, 1 to rebase immediately, 0 to disable rebasing
     'trim_examples': 1, # Trim examples this far back. Does nothing if set to 0

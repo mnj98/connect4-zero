@@ -29,7 +29,7 @@ class NNetWrapper(NeuralNet):
         self.nnet = cnnet(game, args)
         self.board_x, self.board_y = game.getBoardSize()
         self.action_size = game.getActionSize()
-
+        self.optimizer = optim.Adam(self.nnet.parameters())
         if args.cuda:
             self.nnet.cuda()
 
@@ -37,7 +37,6 @@ class NNetWrapper(NeuralNet):
         """
         examples: list of examples, each example is of form (board, pi, v)
         """
-        optimizer = optim.Adam(self.nnet.parameters())
 
         for epoch in range(args.epochs):
             print('EPOCH ::: ' + str(epoch + 1))
@@ -71,9 +70,9 @@ class NNetWrapper(NeuralNet):
                 t.set_postfix(Loss_pi=pi_losses, Loss_v=v_losses)
 
                 # compute gradient and do SGD step
-                optimizer.zero_grad()
+                self.optimizer.zero_grad()
                 total_loss.backward()
-                optimizer.step()
+                self.optimizer.step()
 
     def predict(self, board):
         """
@@ -105,7 +104,8 @@ class NNetWrapper(NeuralNet):
             print("Checkpoint Directory does not exist! Making directory {}".format(folder))
             os.mkdir(folder)
         torch.save({
-            'state_dict': self.nnet.state_dict(),
+            'model_state_dict': self.nnet.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict()
         }, filepath)
 
     def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
@@ -115,4 +115,5 @@ class NNetWrapper(NeuralNet):
             raise ("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
-        self.nnet.load_state_dict(checkpoint['state_dict'])
+        self.nnet.load_state_dict(checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

@@ -88,6 +88,8 @@ class Coach():
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
 
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
+                    #try to make this async, should work if we can make a copy of all the args
+                    #and pass the mcts to executeEpisode
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
                     iterationTrainExamples.extend(self.executeEpisode())
 
@@ -185,7 +187,7 @@ class Coach():
             self.getTrainExampleFile(examplesFile)
 
     def trimExamples(self):
-        examplesFile = os.path.join(self.args.load_folder_file[0], "checkpoint_" + str(self.iter - 1 - self.args.trim_examples) + ".pth.tar.examples")
+        examplesFile = os.path.join(self.args.checkpoint, "checkpoint_" + str(self.iter - 1 - self.args.trim_examples) + ".pth.tar.examples")
         if os.path.isfile(examplesFile):
             log.info(f"Removing: {examplesFile} to trim examples.")
             os.remove(examplesFile)

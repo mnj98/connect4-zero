@@ -1,6 +1,6 @@
 # CHANGE THESE TO MATCH THE MODEL
-from connect4.torch_3L_K3_C27_1LS.NNet import NNetWrapper as nn
-MODEL = "torch_3L_K3_C27_1LS"
+from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as nn
+MODEL = "torch_3L_K3_C18_1LS"
 
 import logging
 import coloredlogs
@@ -17,10 +17,10 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 CHECKPOINTS = os.path.join('saved_checkpoints', MODEL)
 args = dotdict({
-    'numIters': 500,
+    'numIters': 250,
     'numEps': 300,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
-    'updateThreshold': 0.505,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
+    'updateThreshold': 0.501,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
     'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 150,         # Number of games to play during arena play to determine if new net will be accepted.
@@ -32,8 +32,8 @@ args = dotdict({
     'numItersForTrainExamplesHistory': 20,
     'rebase_to_best_on_reject': 15, # rebase after this many rejections in a row, 1 to rebase immediately, 0 to disable rebasing
     'trim_examples': 1, # Trim examples this far back. Does nothing if set to 0
-    'draw_penalty': 0.05, # Penalization for drawing, 0 is none, 1 is as much as a loss
-    'training_draw_penalty': 0.05 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
+    'draw_penalty': 0.0, # Penalization for drawing, 0 is none, 1 is as much as a loss
+    'training_draw_penalty': 0.5 # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
 
 })
 

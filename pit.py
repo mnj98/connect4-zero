@@ -41,13 +41,13 @@ args1 = args
 
 # nnet players
 n1 = NNet(g)
-n1.load_checkpoint('./saved_checkpoints/torch_3L_K3_C18_1LS_2', 'best.pth.tar')
+n1.load_checkpoint('./saved_checkpoints/torch_3L_K3_C18_1LS', 'best.pth.tar')
 mcts1 = MCTS(g, n1, args1)
 n1 = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
 
 
 n2 = NNet(g)
-n2.load_checkpoint('./saved_checkpoints/torch_3L_K3_C18_1LS_v3', 'best.pth.tar')
+n2.load_checkpoint('./saved_checkpoints/torch_3L_K3_C18_1LS', 'best.pth.tar')
 mcts2 = MCTS(g, n2, args1)
 n2 = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
 '''

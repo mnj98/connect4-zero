@@ -13,7 +13,7 @@ class Arena():
     An Arena class where any 2 agents can be pit against each other.
     """
 
-    def __init__(self, player1, player2, game: Connect4Game, display=None, solver=False):
+    def __init__(self, player1, player2, game: Connect4Game, display=None, solver=False, switch=True):
         """
         Input:
             player 1,2: two functions that takes board as input, return action
@@ -32,8 +32,8 @@ class Arena():
         self.game = game
         self.display = display
 
-        self.solver = False
-        if solver: self.solver = True
+        self.solver = solver
+        self.switch = switch
 
     def playGame(self, verbose=False):
         """
@@ -91,7 +91,8 @@ class Arena():
             draws:  games won by nobody
         """
 
-        num = int(num / 2)
+        if self.switch:
+            num = int(num / 2)
         oneWon = 0
         twoWon = 0
         draws = 0
@@ -104,19 +105,23 @@ class Arena():
             else:
                 draws += 1
 
-        self.player1, self.player2 = self.player2, self.player1
-
         data = (oneWon, twoWon, draws)
-        for _ in tqdm(range(num), desc="Arena.playGames (2)"):
-            gameResult = self.playGame(verbose=verbose)
-            if gameResult == -1:
-                oneWon += 1
-            elif gameResult == 1:
-                twoWon += 1
-            else:
-                draws += 1
         print("P1 goes first:")
         print(data)
-        print("P2 goes first:")
-        print((oneWon - data[0], twoWon - data[1], draws - data[2]))
+
+        if self.switch:
+            self.player1, self.player2 = self.player2, self.player1
+
+            for _ in tqdm(range(num), desc="Arena.playGames (2)"):
+                gameResult = self.playGame(verbose=verbose)
+                if gameResult == -1:
+                    oneWon += 1
+                elif gameResult == 1:
+                    twoWon += 1
+                else:
+                    draws += 1
+
+            print("P2 goes first:")
+            print((oneWon - data[0], twoWon - data[1], draws - data[2]))
+            
         return oneWon, twoWon, draws

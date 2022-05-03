@@ -1,4 +1,5 @@
 import random
+from matplotlib.pyplot import draw
 import numpy as np
 import sys
 import subprocess
@@ -24,7 +25,9 @@ class SolverPlayer():
         self.book_file = book_file
 
     def play(self, board):
-        return random.choice(self.best_move(board))
+        move = random.choice(self.best_move(board))
+        #print(f'solver plays: {move}')
+        return move
 
     def best_move(self, board):
         # may need to check the precoditions in the solvers main.cpp
@@ -40,27 +43,25 @@ class SolverPlayer():
         winners = []
         blockers = []
         drawers = []
-        player1 = (len(self.game.moves_made) + 1) % 2
-        if player1:
-            player_value = -1
-        else:
-            player_value = 1
-        print(f"player value: {player_value}")
+
+        player_value = 1
+        #print(f"player value: {player_value}")
 
         valid = self.game.getValidMoves(np.copy(board), player_value)
         for i in range(0, 7):
             if not valid[i]:
                 continue
-
-            results = subprocess.run([self.solver_file, '-b', self.book_file, '', moves_made+str(i+1)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-            win, winning_player = self.check_win(i, board, player_value)
-            if win and winning_player == player_value:
+            
+            if self.check_win(i, np.copy(board), player_value) == 1:
+                # Winning move for other player, append to blockers
                 winners.append(i)
-            #win, winning_player = self.check_win(i, board, player_value)
-            if win and winning_player == -1 * player_value:
+            elif self.check_win(i, np.copy(board), -player_value) == 1:
+                #print(f'{i} IS A WINNING MOVE for {-1 * player_value}, SHOULD BE TAKEN UNLESS WINNING MOVE FOR SELF IS FOUND')
                 blockers.append(i)
             else:
+                results = subprocess.run([self.solver_file, '-b', self.book_file, '', moves_made+str(i+1)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
                 try:
+
                     score = int(results.stdout)
                     solver_scores.append(score)
                     solver_actions.append(i)
@@ -70,18 +71,13 @@ class SolverPlayer():
                     print(results.stderr)
                     print(f"check_win output: {self.check_win(i, board, player_value)}")
                     winners.append(i)
-        
+        '''
         print(f"moves_made: {moves_made}")
         print(f"solver_scores: {solver_scores}")
         print(f"solver_actions: {solver_actions}")
-
-        if len(winners) > 0:
-            print(f"WINNERS: {winners}")
-            return winners
-        
-        if len(blockers) > 0:
-            print(f"BLOCKERS: {blockers}")
-            return blockers
+        print(f"solver_winners: {winners}")
+        print(f"solver_blockers: {blockers}")
+        '''
 
         for i in range(len(solver_scores)):
             if solver_scores[i] == best_score:
@@ -90,11 +86,17 @@ class SolverPlayer():
                 best_score = solver_scores[i]
                 best_moves = [solver_actions[i]]
         
+        if len(winners) > 0:
+            return winners
+        
+        if len(blockers) > 0:
+            return blockers
+
         if best_score > 0 and len(drawers) > 0:
             return drawers
 
         if len(best_moves) > 0:
-            print(f"solver_best: {best_moves}")
+            #print(f"solver_best: {best_moves}")
             return best_moves
 
         else:
@@ -103,15 +105,28 @@ class SolverPlayer():
                 i += 1
             return [i]
 
-    def check_win(self, column, board, player_value):
-        potential_board = Board(height=6, width=7, win_length=4, np_pieces=np.copy(board))
-        if potential_board.get_valid_moves()[column]:
-            potential_board.add_stone(column, player_value)
-            win, win_player = potential_board.get_win_state()
-            if win:
-                print(f"win for: {win_player}, at {column}")
-            return win, win_player
-        return False, None
+    def check_win(self, action, board, player_value):
+        b = Board(height=6, width=7, win_length=4, np_pieces=board)
+        b.add_stone(action, player_value)
+        winstate = b.get_win_state()
+        if winstate.is_ended:
+            if winstate.winner is None:
+                # draw has very little negative value for player 1 and small positive if player 2.
+                if player_value == -1:
+                    return -0.5
+                elif player_value == 1:
+                    return 0.5
+                else:
+                    raise ValueError('Unexpected winstate found: ', winstate)
+            elif winstate.winner == player_value:
+                return +1
+            elif winstate.winner == -player_value:
+                return -1
+            else:
+                raise ValueError('Unexpected winstate found: ', winstate)
+        else:
+            # 0 used to represent unfinished game.
+            return 0
 
 class HumanConnect4Player():
     def __init__(self, game):

@@ -63,6 +63,7 @@ class Arena():
             else:
                 action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
             '''
+            #print(board)
             action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer), 1)
 

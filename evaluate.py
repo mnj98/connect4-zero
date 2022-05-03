@@ -13,13 +13,13 @@ import numpy as np
 from utils import *
 
 
-def main():
+def get_results():
     solver_dir = os.path.join(os.curdir, "connect4solver")
     solver_file = os.path.join(solver_dir, "c4solver")
     if not os.path.isfile(solver_file):
         subprocess.run(['make', '-C', solver_dir, 'clean'])
         subprocess.run(['make', '-C', solver_dir, 'c4solver'])
-    
+
     book_file = os.path.join(solver_dir, "7x6.book")
 
     game = Game(args)
@@ -35,7 +35,7 @@ def main():
     NUM_GAMES = 10
     results = []
     # nnet players
-    
+
     for i in range(MAX_MODEL_CHECKPOINTS + 1):
         print(f"Evaluating Checkpoint {i}")
         n1 = NNet(game)
@@ -49,10 +49,15 @@ def main():
             arena = Arena.Arena(n1, solver_player, game, display=Game.display, solver=True, switch=False)
             n1_wins, solver_wins, draws = arena.playGames(NUM_GAMES, verbose=False)
             results.append((i, n1_wins, solver_wins, draws))
-    print(results)
-    f = open(os.path.join(models_path, "results.txt"), "w")
-    f.write(str(results))
-    f.close()
-    
+    df = pd.DataFrame(results,columns=['iter','n1_wins','solver_wins','draws'])
+    df.to_csv('results.csv',index=False)
+
+def graph_results():
+    df = pd.read_csv('results.csv')
+
+    fig = df.plot(kind='line',x='iter', title='scores over iterations',ylabel='number of games',xlabel='iteration number')
+    fig.figure.savefig('results.png')
+
 if __name__ == "__main__":
-    main()
+    get_results()
+    graph_results()

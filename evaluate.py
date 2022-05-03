@@ -11,7 +11,7 @@ from connect4.Connect4Players import *
 from main import args
 import numpy as np
 from utils import *
-
+import pandas as pd
 
 def get_results():
     solver_dir = os.path.join(os.curdir, "connect4solver")

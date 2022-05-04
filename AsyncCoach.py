@@ -32,13 +32,20 @@ class Coach():
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
         self.iter = 1
         self.consecutive_rejections = 0
-        self.arena_games = 10
-        self.num_arenas = 15
+        self.arena_games = self.args.arena_execs
+        self.num_arenas = self.args.arenaCompare // self.arena_games
 
     def arenaPlay(self):
         arena = Arena(lambda x: np.argmax(MCTS(self.game, self.pnet, self.args).getActionProb(x, temp=0)),
                       lambda x: np.argmax(MCTS(self.game, self.nnet, self.args).getActionProb(x, temp=0)), self.game, num_games = self.arena_games)
         return arena.playGames()
+
+    def executeEpisodes(self):
+        examples = []
+        for _ in range(self.args.num_selfplay_execs):
+            examples.extend(self.executeEpisode())
+        return examples
+
     def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
@@ -107,17 +114,25 @@ class Coach():
                 #print("Starting Async Self Play")
                 p = []
                 #self_play_start = time.time()
+                num_execs = self.args.numEps // self.args.num_selfplay_execs
                 with multiprocessing.Pool(processes= self.args.async_mcts_procs) as pool:
-                    for ep in range(self.args.numEps):
+                    for ep in range(num_execs):
                         #try to make this async, should work if we can make a copy of all the args
                         #and pass the mcts to executeEpisode
-                        p.append(pool.apply_async(self.executeEpisode))
-                    for ep in tqdm(range(self.args.numEps), desc="Async Self Play"):
+                        p.append(pool.apply_async(self.executeEpisodes))
+                    for ep in tqdm(range(num_execs), desc="Async Self Play"):
                         iterationTrainExamples.extend(p[ep].get(timeout=180))
                     pool.close()
                     pool.join()
-
+                
+                '''
+                for _ in tqdm(range(self.args.numEps), desc="Self Play"):
+                    #try to make this async, should work if we can make a copy of all the args
+                    #and pass the mcts to executeEpisode
+                    self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
+                    iterationTrainExamples.extend(self.executeEpisode())
                 #print(f"Completed Async Self Play in {time.time() - self_play_start}s")
+                '''
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
 

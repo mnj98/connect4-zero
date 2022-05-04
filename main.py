@@ -1,6 +1,6 @@
 # CHANGE THESE TO MATCH THE MODEL
-from connect4.torch_3L_K3_C18_2LS.NNet import NNetWrapper as nn
-MODEL = "torch_3L_K3_C18_2LS_FIXED"
+from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as nn
+MODEL = "torch_3L_K3_C18_1LS_FIXED"
 
 import logging
 import coloredlogs
@@ -24,6 +24,7 @@ args = dotdict({
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
     'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 150,         # Number of games to play during arena play to determine if new net will be accepted. # If changing this update slef.arena_games and self.num_arenas in AsyncCoach
+    'arena_execs': 10, #number of arena games to play per arena, arenaCompare must be divisible by this
     'cpuct': 1,
 
     'checkpoint': CHECKPOINTS,
@@ -34,6 +35,7 @@ args = dotdict({
     'trim_examples': 1, # Trim examples this far back. Does nothing if set to 0
     'draw_penalty': 0.0, # Penalization for drawing, 0 is none, 1 is as much as a loss
     'training_draw_penalty': 0.01, # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
+    'num_selfplay_execs': 10, # Number of self-plays per exec, numEps must be divisible by this
     'async_mcts_procs': 4
 })
 

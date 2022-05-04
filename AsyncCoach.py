@@ -8,8 +8,8 @@ from random import shuffle
 import numpy as np
 from tqdm import tqdm
 
-#from AsyncArena import Arena, Results
-from Arena import Arena
+from AsyncArena import Arena
+#from Arena import Arena
 from MCTS import MCTS
 import time
 import multiprocessing
@@ -32,7 +32,13 @@ class Coach():
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
         self.iter = 1
         self.consecutive_rejections = 0
+        self.arena_games = 10
+        self.num_arenas = 15
 
+    def arenaPlay(self):
+        arena = Arena(lambda x: np.argmax(MCTS(self.game, self.pnet, self.args).getActionProb(x, temp=0)),
+                      lambda x: np.argmax(MCTS(self.game, self.nnet, self.args).getActionProb(x, temp=0)), self.game, num_games = self.arena_games)
+        return arena.playGames()
     def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
@@ -100,7 +106,7 @@ class Coach():
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
                 #print("Starting Async Self Play")
                 p = []
-                self_play_start = time.time()
+                #self_play_start = time.time()
                 with multiprocessing.Pool(processes= self.args.async_mcts_procs) as pool:
                     for ep in range(self.args.numEps):
                         #try to make this async, should work if we can make a copy of all the args
@@ -140,39 +146,27 @@ class Coach():
 
             self.nnet.train(trainExamples)
 
-            pmcts = MCTS(self.game, self.pnet, self.args)
-            nmcts = MCTS(self.game, self.nnet, self.args)
-
-            log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
-            pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
-            '''
-            print("PITTING AGAINST PREVIOUS VERSION")
+            log.info("PITTING AGAINST PREVIOUS VERSION")
 
             p = []
-            self_eval_start = time.time()
+            #self_eval_start = time.time()
             pwins, nwins, draws = 0, 0, 0
-            arena_games = 10
-            num_arenas = 15
             with multiprocessing.Pool(processes= self.args.async_mcts_procs) as pool:
-                for eval in range(num_arenas):
+                for eval in range(self.num_arenas):
                     #try to make this async, should work if we can make a copy of all the args
                     #and pass the mcts to executeEpisode
-                    arena = Arena(lambda x: np.argmax(MCTS(self.game, self.pnet, self.args).getActionProb(x, temp=0)),
-                      lambda x: np.argmax(MCTS(self.game, self.nnet, self.args).getActionProb(x, temp=0)), self.game, num_games = arena_games)
-                    p.append(pool.apply_async(arena.playGames()))
+                    p.append(pool.apply_async(self.arenaPlay))
                     
-                for eval in range(num_arenas):
-                    res = p[eval].get(timeout=300)
-                    results = res.getResults()
+                for eval in tqdm(range(self.num_arenas), desc="Async Pitting"):
+                    results = p[eval].get(timeout=180)
                     pwins += results[0]
                     nwins += results[1]
                     draws += results[2]
 
                 pool.close()
-            print(f"Completed Evaluations in {time.time() - self_eval_start}s")
-            '''
+                pool.join()
+
+            #print(f"Completed Evaluations in {time.time() - self_eval_start}s")
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             reject = pwins + nwins == 0 or float(nwins) / (pwins + nwins + (draws * self.args.draw_penalty)) < self.args.updateThreshold
 

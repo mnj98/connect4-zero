@@ -46,13 +46,7 @@ class Connect4Game(Game):
         winstate = b.get_win_state()
         if winstate.is_ended:
             if winstate.winner is None:
-                # draw has very little negative value for player 1 and small positive if player 2.
-                if player == -1:
-                    return self.args.training_draw_penalty * -1
-                elif player == 1:
-                    return self.args.training_draw_penalty
-                else:
-                    raise ValueError('Unexpected winstate found: ', winstate)
+               return self.args.training_draw_penalty
             elif winstate.winner == player:
                 return +1
             elif winstate.winner == -player:

@@ -64,11 +64,21 @@ class Coach():
 
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
-
+            #print(f"player before game ended: {self.curPlayer}")
             r = self.game.getGameEnded(board, self.curPlayer)
-
+            #print(f"playe after game ended: {self.curPlayer}")
+            #print(f"r: {r}")
+            # if the game ends when you check and it's -1, you lost
+            #print(trainExamples)
             if r != 0:
-                return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+                #print(f"GAME OVER ========")
+                #print(f"train examples: {trainExamples}")
+                if r == self.args.training_draw_penalty:
+                    #print("DRAW")
+                    #current player gets negative penalty because they went first
+                    return [(x[0], x[2], -r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+                else:
+                    return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
 
     def learn(self):
         """

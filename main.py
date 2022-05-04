@@ -4,7 +4,7 @@ MODEL = "torch_3L_K3_C18_2LS_FIXED"
 
 import logging
 import coloredlogs
-from Coach import Coach
+from AsyncCoach import Coach
 #from othello.OthelloGame import OthelloGame as Game
 from connect4.Connect4Game import Connect4Game as Game
 #from othello.pytorch.NNet import NNetWrapper as nn

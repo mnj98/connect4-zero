@@ -1,6 +1,6 @@
 # CHANGE THESE TO MATCH THE MODEL
-from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as nn
-MODEL = "torch_3L_K3_C18_1LS_FIXED"
+from connect4.torch_4L_K3_C27_1LS.NNet import NNetWrapper as nn
+MODEL = "torch_4L_K3_C27_1LS_FIXED"
 
 import logging
 import coloredlogs
@@ -36,7 +36,8 @@ args = dotdict({
     'draw_penalty': 0.0, # Penalization for drawing, 0 is none, 1 is as much as a loss
     'training_draw_penalty': 0.01, # Penalization for drawing during training (CANNOT BE 0). If you want to reward for draws make this positive
     'num_selfplay_execs': 10, # Number of self-plays per exec, numEps must be divisible by this
-    'async_mcts_procs': 4
+    'async_mcts_procs': 4,
+    'draw_always_bad': False
 })
 
 

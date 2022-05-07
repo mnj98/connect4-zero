@@ -76,7 +76,10 @@ class Coach():
                 if r == self.args.training_draw_penalty:
                     #print("DRAW")
                     #current player gets negative penalty because they went first
-                    return [(x[0], x[2], -r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+                    if self.args.draw_always_bad:
+                        return [(x[0], x[2], -0.1) for x in trainExamples]
+                    else:
+                        return [(x[0], x[2], -r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
                 else:
                     return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
 

@@ -1,8 +1,13 @@
-from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as NNet
-MODEL = "torch_3L_K3_C18_1LS"
+##IMPORT ALL THE MODEL
+
+
+from connect4.torch_3L_K3_C18_1LS_OLD.NNet import NNetWrapper as torch_3L_K3_C18_1LS_OLD_NNet
+MODELS = [("torch_3L_K3_C18_1LS_OLD",torch_3L_K3_C18_1LS_OLD_NNet)]
 
 import subprocess
 import os
+import fnmatch
+import re
 
 import Arena
 from MCTS import MCTS
@@ -30,34 +35,48 @@ def get_results():
 
     # TODO: LOAD THE MODEL
     # TODO: MAKE MODEL PLAY AGAINST THE SOLVER OR AGAINST ITSELF AND HAVE THE SOLVER JUDGE PERFORMANCE
-    models_path = os.path.join("saved_checkpoints", MODEL)
-    MAX_MODEL_CHECKPOINTS = 200
-    NUM_GAMES = 10
-    results = []
-    # nnet players
 
-    for i in range(MAX_MODEL_CHECKPOINTS + 1):
-        print(f"Evaluating Checkpoint {i}")
-        n1 = NNet(game)
-        checkpoint_file = "checkpoint_"+ str(i) + ".pth.tar"
-        if os.path.isfile(os.path.join(models_path, checkpoint_file)):
-            n1.load_checkpoint(models_path, checkpoint_file)
-            mcts1 = MCTS(game, n1, args)
-            n1 = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
-            # The solver will always win the fist move so to test models we only need to play with the solver as Player 2.
-            # Setting switch to false to achieve this
-            arena = Arena.Arena(n1, solver_player, game, display=Game.display, solver=True, switch=False)
-            n1_wins, solver_wins, draws = arena.playGames(NUM_GAMES, verbose=False)
-            results.append((i, n1_wins, solver_wins, draws))
-    df = pd.DataFrame(results,columns=['iter','n1_wins','solver_wins','draws'])
-    df.to_csv('results.csv',index=False)
+    for model in MODELS:
+        MODEL = model[0]
+        models_path = os.path.join("saved_checkpoints", MODEL)
+        checkpoints = np.sort(np.array(fnmatch.filter(os.listdir(models_path), "checkpoint_*.pth.tar")))
+        num_checkpoints = len(checkpoints)
 
-def graph_results():
-    df = pd.read_csv('results.csv')
+        checkpoints = checkpoints[np.round(np.linspace(0, len(checkpoints) - 1, 25)).astype(int)]
+        #print(checkpoints)
+        MAX_MODEL_CHECKPOINTS = 200
+        NUM_GAMES = 20
+        results = []
+        # nnet players
 
-    fig = df.plot(kind='line',x='iter', title='scores over iterations',ylabel='number of games',xlabel='iteration number')
-    fig.figure.savefig('results.png')
+        for checkpoint in checkpoints:
+            #print(f"Evaluating Checkpoint {i}")
+            n1 = model[1](game)
+            checkpoint_file = checkpoint #"checkpoint_"+ str(i) + ".pth.tar"
+            if os.path.isfile(os.path.join(models_path, checkpoint_file)):
+                n1.load_checkpoint(models_path, checkpoint_file)
+                mcts1 = MCTS(game, n1, args)
+                n1 = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
+                # The solver will always win the fist move so to test models we only need to play with the solver as Player 2.
+                # Setting switch to false to achieve this
+                arena = Arena.Arena(n1, solver_player, game, display=Game.display, solver=True, switch=False)
+                n1_wins, solver_wins, draws = arena.playGames(NUM_GAMES, verbose=False)
+
+
+                index = re.findall(r'\d+', checkpoint)
+                index = list(map(int, index))[0]
+                results.append((index, n1_wins, draws))
+        df = pd.DataFrame(results,columns=['iter','wins','draws'])
+        df.to_csv(MODEL + '_results.csv',index=False)
+        graph_results(MODEL)
+
+def graph_results(model):
+    df = pd.read_csv(model + '_results.csv')
+
+    fig = df.plot(kind='line',x='iter', title='Agent vs Solver',ylabel='number of games',xlabel='iteration number')
+    fig.figure.savefig(model + '_results.png')
 
 if __name__ == "__main__":
+    #print(fnmatch.filter(os.listdir('./saved_checkpoints/' + MODELS[0]), "checkpoint_*.pth.tar"))
     get_results()
-    graph_results()
+    #graph_results()

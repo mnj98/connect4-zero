@@ -1,4 +1,5 @@
 # Reproducing Our Results
+Dependencies are located in requirements.txt.
 Import the model into main.py and specify the desired output folder for the training as the
 MODEL constant. If you plan on using cuda to train then you need to switch the Coach import from AsyncCoach to Coach,
 but cuda can also be disabled by editing the model's NNet.py args. 

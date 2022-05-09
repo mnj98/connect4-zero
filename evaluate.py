@@ -71,7 +71,8 @@ def get_results():
                 index = list(map(int, index))[0]
                 results.append((index, n1_wins, draws))
         df = pd.DataFrame(results,columns=['iter','wins','draws'])
-        df.sort_values(0)
+        #print(df)
+        df.sort_values('iter')
         df.to_csv(MODEL + '_results.csv',index=False)
         graph_results(MODEL)
 

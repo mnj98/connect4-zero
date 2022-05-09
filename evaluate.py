@@ -1,13 +1,11 @@
 ##IMPORT ALL THE MODEL
 
 
-from connect4.torch_3L_K3_C18_1LS.NNet import NNetWrapper as torch_3L_K3_C18_1LS_NNet
-from connect4.torch_3L_K3_C18_2LS.NNet import NNetWrapper as torch_3L_K3_C18_2LS_NNet
-from connect4.torch_4L_K3_C27_1LS.NNet import NNetWrapper as torch_4L_K3_C27_2LS_NNet
+from connect4.torch_4L_K3_C18_1LS.NNet import NNetWrapper as torch_4L_K3_C18_1LS_NNet
+#from connect4.torch_3L_K3_C27_2LS.NNet import NNetWrapper as torch_3L_K3_C27_2LS_NNet
+#from connect4.torch_4L_K3_C27_1LS.NNet import NNetWrapper as torch_4L_K3_C27_2LS_NNet
 MODELS = [
-    ("torch_3L_K3_C18_1LS_FIXED", torch_3L_K3_C18_1LS_NNet),
-    ("torch_3L_K3_C18_2LS_FIXED", torch_3L_K3_C18_2LS_NNet),
-    ("torch_4L_K3_C27_1LS_FIXED", torch_4L_K3_C27_2LS_NNet)
+    ("torch_4L_K3_C18_1LS_FIXED", torch_4L_K3_C18_1LS_NNet)
 ]
 
 import subprocess

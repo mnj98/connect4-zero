@@ -1,4 +1,5 @@
 this model was trained with rebasing to best model after 15 rejections,
 lr = 0.001
 with update threshold 0.505, 50 MCTS sims, 
-dropout 0.1, and draw penalty 0.05
+dropout 0.1, and draw penalty 0.05 for all players
+REASON THIS MODEL IS OLD IS BECAUSE IT WAS TRAINED WITH DROPOUT ON THE OUTPUT LAYER
